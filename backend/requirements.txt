@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+ultralytics
+opencv-python-headless
+easyocr
+ffmpeg-python
+python-dotenv
+sqlalchemy
+psycopg2-binary
