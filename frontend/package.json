@@ -22,7 +22,6 @@
     "react-player": "^3.4.0"
   },
   "devDependencies": {
-    "@prisma/client": "^7.4.2",
     "@tailwindcss/postcss": "^4",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
@@ -30,7 +29,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "prisma": "^7.4.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
