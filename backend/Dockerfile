@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Optimized Monolithic Layer: Install + Download + Clean
-# We combine everything to avoid layer bloat which causes Railway build failure
+# Note: We don't COPY .env here. Use Railway Variables UI instead.
 COPY requirements.txt download_models.py ./
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
@@ -29,11 +29,10 @@ RUN pip install --upgrade pip && \
     apt-get purge -y --auto-remove build-essential && \
     rm -rf /root/.cache/pip /tmp/*
 
-# 3. Copy only necessary app files
+# 3. Copy our application code
 COPY main.py .
-COPY .env . 
 
-# Ensure directories exist
+# Ensure directories exist for runtime
 RUN mkdir -p temp uploads processed
 
 # Port and Start
