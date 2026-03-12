@@ -8,13 +8,19 @@ def download():
     print("📦 Loading ArcFace...")
     DeepFace.build_model("ArcFace")
     
-    # 2. Build MTCNN model (for Face Detection)
-    # We trigger a dummy extraction to force MTCNN weights download
+    # 2. Build MTCNN model (for Face Detection in Video)
     import numpy as np
     dummy_img = np.zeros((100, 100, 3), dtype=np.uint8)
     print("📦 Loading MTCNN...")
     try:
         DeepFace.extract_faces(dummy_img, detector_backend='mtcnn', enforce_detection=False)
+    except:
+        pass
+
+    # 3. Build RetinaFace model (for High-Accuracy detection)
+    print("📦 Loading RetinaFace...")
+    try:
+        DeepFace.extract_faces(dummy_img, detector_backend='retinaface', enforce_detection=False)
     except:
         pass
 

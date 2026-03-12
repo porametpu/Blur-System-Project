@@ -1,15 +1,16 @@
-# Use Python 3.11 slim as base image (more stable for ML than 3.12/3.13 in some cloud envs)
+# Use Python 3.11 slim - stable for AI/ML
 FROM python:3.11-slim
 
-# Prevent Python from writing .pyc files and enable unbuffered logging
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV DEBIAN_FRONTEND=noninteractive
+# Build-time environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    PIP_NO_CACHE_DIR=1
 
-# Set work directory
 WORKDIR /app
 
-# Install system dependencies for OpenCV and DeepFace
+# 1. Install system dependencies and clean up in one layer to save space
+# Replaced libgl1-mesa-glx with libgl1 as per previous fix
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libgl1 \
@@ -22,21 +23,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# 2. Install Python dependencies 
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
+# 3. Pre-download AI models 
+# We do this separately to leverage Docker layer caching
 COPY download_models.py .
-
-# Pre-download AI models
 RUN python download_models.py
 
-# Copy the rest of the application
+# 4. Copy the rest of the application
+# .dockerignore will handle excluding large local files
 COPY . .
 
-# Port
-EXPOSE 8000
+# 5. Clean up build tools to drastically reduce image size
+RUN apt-get purge -y --auto-remove build-essential && \
+    rm -rf /root/.cache/pip
 
-# Start command
+# Port and Start Command
+EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
