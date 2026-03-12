@@ -3,8 +3,11 @@ uvicorn
 python-multipart
 ultralytics
 opencv-python-headless
-easyocr
-ffmpeg-python
+deepface
+torch
+torchvision
+cloudinary
 python-dotenv
-sqlalchemy
-psycopg2-binary
+numpy
+tf-keras
+tensorflow-cpu

@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
         const blurType = formData.get('blurType') as string || 'gaussian';
         const blurStrength = formData.get('blurStrength') as string || '50';
         const timestamp = formData.get('timestamp') as string || '0';
+        const action = formData.get('action') as string || 'static';
 
         if (!file) {
             return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -72,6 +73,7 @@ export async function POST(req: NextRequest) {
             aiForm.append('blur_type', blurType);
             aiForm.append('blur_strength', blurStrength);
             aiForm.append('timestamp', timestamp);
+            aiForm.append('action', action);
 
             try {
                 const resp = await fetch(`${baseUrl}/api/selective-blur`, {

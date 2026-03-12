@@ -2,10 +2,9 @@
 
 ---
 
-## 🛠️ Installation Guide (Step-by-Step)
+## Installation 
 
-### 1. Backend Setup (FastAPI)
-The backend handles AI processing, video frame extraction, and blurring logic.
+### 1. Backend Setup
 
 1. **Navigate to the backend directory:**
    ```bash
@@ -36,7 +35,6 @@ The backend handles AI processing, video frame extraction, and blurring logic.
    CLOUDINARY_API_KEY=your_api_key
    CLOUDINARY_API_SECRET=your_api_secret
 
-   # Optional Database (If using History feature)
    DATABASE_URL=postgresql://user:password@localhost:5432/blurdb
    ```
 
@@ -44,7 +42,6 @@ The backend handles AI processing, video frame extraction, and blurring logic.
    ```bash
    python main.py
    ```
-   *Available at: `http://localhost:8000`*
 
 ---
 
@@ -76,13 +73,12 @@ The backend handles AI processing, video frame extraction, and blurring logic.
 4. **Database Migration (Prisma):**
    ```bash
    npx prisma generate
-   # npx prisma db push (If you have a database connected)
+   # npx prisma db push
    ```
 
 5. **Run the Development Server:**
    ```bash
    npm run dev
    ```
-   *Available at: `http://localhost:3000`*
 
 ---

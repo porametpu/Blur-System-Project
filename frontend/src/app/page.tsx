@@ -119,7 +119,7 @@ export default function Home() {
     } catch { setError('AI Engine is currently unavailable.'); } finally { setIsProcessing(false); }
   };
 
-  const applySelective = async (regions: BlurRegion[]) => {
+  const applySelective = async (regions: BlurRegion[], action: 'static' | 'blur_only' | 'blur_except' = 'static') => {
     if (!file) return;
     setIsProcessing(true); setError(null);
     const ts = (file.type.startsWith('video/') && imgRef.current)
@@ -134,6 +134,7 @@ export default function Home() {
       fd.append('blurType', blurType);
       fd.append('blurStrength', blurStrength.toString());
       fd.append('timestamp', ts.toString());
+      fd.append('action', action);
 
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
@@ -349,9 +350,20 @@ export default function Home() {
                   <div className="space-y-8 pt-8 border-t border-slate-100">
                     <BlurStyleSelector value={blurType} onChange={setBlurType} options={blurStyles} />
                     <IntensitySlider value={blurStrength} onChange={setBlurStrength} />
-                    <button onClick={() => applySelective(detections.filter(d => selectedFaces.has(d.id)).map(d => d.face_bbox))} disabled={isProcessing || selectedFaces.size === 0} className="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-3xl font-black text-xl shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-30">
-                      Start Processing
-                    </button>
+                    {file?.type.startsWith('video/') ? (
+                      <div className="flex flex-col gap-3">
+                        <button onClick={() => applySelective(detections.filter(d => selectedFaces.has(d.id)).map(d => ({ ...d.face_bbox, source: 'ai' })), 'blur_only')} disabled={isProcessing || selectedFaces.size === 0} className="w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-2xl font-black text-sm shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center justify-center gap-2">
+                          <Eye className="w-5 h-5" /> Blur Selected Person (Track)
+                        </button>
+                        <button onClick={() => applySelective(detections.filter(d => selectedFaces.has(d.id)).map(d => ({ ...d.face_bbox, source: 'ai' })), 'blur_except')} disabled={isProcessing || selectedFaces.size === 0} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center justify-center gap-2">
+                          <Shield className="w-5 h-5" /> Blur EVERYONE EXCEPT Selected
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => applySelective(detections.filter(d => selectedFaces.has(d.id)).map(d => ({ ...d.face_bbox, source: 'ai' })))} disabled={isProcessing || selectedFaces.size === 0} className="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-3xl font-black text-xl shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center justify-center gap-2">
+                        Start Processing
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
