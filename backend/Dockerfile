@@ -27,11 +27,13 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application
-COPY . .
+COPY download_models.py .
 
 # Pre-download AI models
 RUN python download_models.py
+
+# Copy the rest of the application
+COPY . .
 
 # Port
 EXPOSE 8000
