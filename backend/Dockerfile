@@ -12,7 +12,8 @@ WORKDIR /app
 # Install system dependencies for OpenCV and DeepFace
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libgl1-mesa-glx \
+    libgl1 \
+    libglapi-mesa \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
@@ -29,10 +30,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy the rest of the application
 COPY . .
 
-# Pre-download AI models so they are baked into the image
+# Pre-download AI models
 RUN python download_models.py
 
-# Expose the port Railway expects (default 8000 for FastAPI)
+# Port
 EXPOSE 8000
 
 # Start command
