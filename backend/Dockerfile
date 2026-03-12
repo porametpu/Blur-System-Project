@@ -1,16 +1,13 @@
-# Use Python 3.11 slim - stable for AI/ML
+# Use Python 3.11 slim
 FROM python:3.11-slim
 
-# Build-time environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DEBIAN_FRONTEND=noninteractive \
-    PIP_NO_CACHE_DIR=1
+    DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
-# 1. Install system dependencies and clean up in one layer to save space
-# Replaced libgl1-mesa-glx with libgl1 as per previous fix
+# 1. Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libgl1 \
@@ -23,24 +20,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 2. Install Python dependencies 
-COPY requirements.txt .
+# 2. Optimized Monolithic Layer: Install + Download + Clean
+# We combine everything to avoid layer bloat which causes Railway build failure
+COPY requirements.txt download_models.py ./
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    python download_models.py && \
+    apt-get purge -y --auto-remove build-essential && \
+    rm -rf /root/.cache/pip /tmp/*
 
-# 3. Pre-download AI models 
-# We do this separately to leverage Docker layer caching
-COPY download_models.py .
-RUN python download_models.py
+# 3. Copy only necessary app files
+COPY main.py .
+COPY .env . 
 
-# 4. Copy the rest of the application
-# .dockerignore will handle excluding large local files
-COPY . .
+# Ensure directories exist
+RUN mkdir -p temp uploads processed
 
-# 5. Clean up build tools to drastically reduce image size
-RUN apt-get purge -y --auto-remove build-essential && \
-    rm -rf /root/.cache/pip
-
-# Port and Start Command
+# Port and Start
 EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
